@@ -54,10 +54,10 @@ const COLLECTION_URI = 'https://raw.githubusercontent.com/Squads-Protocol/sdk-ex
 const NFT_URI = 'https://raw.githubusercontent.com/Squads-Protocol/sdk-examples/fc6222ce177126c648f13ea94f1a5a899af2a43c/examples/nft-collections/nft.json';
 /*
   // for fewer potential issues, you should use a CLI wallet instead of a random keypair that's been airdropped to
+  const homedir = os.homedir();
   let walletJSON = JSON.parse(fs.readFileSync(`${homedir}/.config/solana/id.json`, "utf-8"));
   const walletKeypair = Keypair.fromSecretKey(Uint8Array.from(walletJSON));
   const squads = Squads.endpoint(YOUR_RPC_NODE, new Wallet(walletKeypair));
-  const homedir = os.homedir();
 */
 // if using this random keypair for the test, be sure to airdrop to it using the airdrop function in this repo
 const walletKeypair = web3_js_1.Keypair.generate();
@@ -95,7 +95,7 @@ const createCollectionNFT = (authoritySigner) => __awaiter(void 0, void 0, void 
         updateAuthority: authoritySigner,
         mintTokens: true,
         isCollection: true,
-        sellerFeeBasisPoints: 500,
+        sellerFeeBasisPoints: 500, // Represents 5.00%.
         tokenOwner: authoritySigner.publicKey,
     });
     return nft;
@@ -111,7 +111,7 @@ const createNFT = (vault, collection, mint, destination) => __awaiter(void 0, vo
         name: "NFT SDK Example",
         collectionAuthority: signerCast,
         updateAuthority: signerCast,
-        sellerFeeBasisPoints: 500,
+        sellerFeeBasisPoints: 500, // Represents 5.00%.
         tokenOwner: destination,
         collection,
         mintTokens: true,

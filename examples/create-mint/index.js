@@ -40,9 +40,11 @@ const sdk_1 = __importStar(require("@sqds/sdk"));
 const web3_js_1 = require("@solana/web3.js");
 const sdk_2 = require("@sqds/sdk");
 const bn_js_1 = __importDefault(require("bn.js"));
-const functions_1 = require("../functions");
 const spl_token_1 = require("@solana/spl-token");
-const walletKeypair = web3_js_1.Keypair.generate();
+// const walletKeypair = Keypair.generate();
+const walletKeypair = web3_js_1.Keypair.fromSecretKey(new Uint8Array([54, 138, 156, 241, 182, 204, 234, 176, 250, 228, 105, 125, 111, 239, 33, 196, 173, 250, 26, 205, 243, 242, 227, 34, 220, 249, 134, 79, 132, 133, 95, 195, 243, 50, 181, 7, 87, 35, 64, 243, 121, 246, 186, 252, 238, 123, 168, 147, 199, 21, 158, 110, 166, 214, 224, 27, 6, 24, 142, 172, 34, 183, 237, 114]));
+console.log('Wallet Keypair:', walletKeypair.publicKey.toBase58());
+console.log('Wallet Private Key:', walletKeypair.secretKey.toString());
 const squads = sdk_1.default.devnet(new sdk_2.Wallet(walletKeypair));
 // it is highly recommended that you use a different RPC NODE ie.
 // const squads = Squads.endpoint(YOUR_RPC_NODE, new Wallet(walletKeypair));
@@ -69,7 +71,7 @@ const createSquad = (members, threshold) => __awaiter(void 0, void 0, void 0, fu
 // note that some of the commitment levels fluctuate to accomodate devnet and immediacy
 const mintExample = () => __awaiter(void 0, void 0, void 0, function* () {
     // airdrop to fund the wallet - may fail occasionally since it defaults to public devnet
-    yield (0, functions_1.airdrop)(squads.connection, walletKeypair.publicKey, web3_js_1.LAMPORTS_PER_SOL);
+    // await airdrop(squads.connection, walletKeypair.publicKey, LAMPORTS_PER_SOL);
     const payerBalance = yield squads.connection.getBalance(walletKeypair.publicKey, "confirmed");
     // validate airdrop
     console.log(payerBalance);
@@ -80,7 +82,7 @@ const mintExample = () => __awaiter(void 0, void 0, void 0, function* () {
     const initMembers = [walletKeypair.publicKey, ...otherMembersBesidesWallet.map(kp => kp.publicKey)];
     const initThreshold = 2;
     const { multisigPublicKey, vaultPublicKey } = yield createSquad(initMembers, initThreshold);
-    yield (0, functions_1.airdrop)(squads.connection, vaultPublicKey, web3_js_1.LAMPORTS_PER_SOL);
+    // await airdrop(squads.connection, vaultPublicKey, LAMPORTS_PER_SOL);
     // Create a mint, and assign the authority to the vault
     const newMint = yield (0, spl_token_1.createMint)(squads.connection, walletKeypair, vaultPublicKey, vaultPublicKey, 0, undefined, { commitment: 'processed', skipPreflight: true });
     console.log("New mint created at ", newMint.toBase58());
@@ -91,6 +93,7 @@ const mintExample = () => __awaiter(void 0, void 0, void 0, function* () {
     console.log("Recipient token account created at ", recipientTokenAccount.toBase58());
     // Create a multisig instruction to mint a token and send it to the recipient wallet
     const mintTokenInstruction = yield (0, spl_token_1.createMintToInstruction)(newMint, recipientTokenAccount, vaultPublicKey, 1);
+    console.log("Mint token instruction created", mintTokenInstruction);
     // create the multisig transaction - use default authority Vault (1)
     const multisigTransaction = yield squads.createTransaction(multisigPublicKey, 1);
     // add the instruction to the transaction
@@ -105,7 +108,7 @@ const mintExample = () => __awaiter(void 0, void 0, void 0, function* () {
     // still need one more approval from another member, so we'll use the other member's wallet
     const otherMemberWallet = new sdk_2.Wallet(otherMembersBesidesWallet[0]);
     // make sure there are lamports in the wallet
-    yield (0, functions_1.airdrop)(squads.connection, otherMemberWallet.publicKey, web3_js_1.LAMPORTS_PER_SOL);
+    // await airdrop(squads.connection, otherMemberWallet.publicKey, LAMPORTS_PER_SOL);
     const otherMemberSquads = sdk_1.default.devnet(otherMemberWallet);
     yield otherMemberSquads.approveTransaction(multisigTransaction.publicKey);
     // now you can also check the transaction state, as it should be "executeReady" as the 2/3 threshold has been met
@@ -115,7 +118,7 @@ const mintExample = () => __awaiter(void 0, void 0, void 0, function* () {
     const executorMemberWallet = new sdk_2.Wallet(otherMembersBesidesWallet[1]);
     const executorMemberSquads = sdk_1.default.devnet(executorMemberWallet);
     // make sure there are lamports in the wallet
-    yield (0, functions_1.airdrop)(squads.connection, executorMemberWallet.publicKey, web3_js_1.LAMPORTS_PER_SOL);
+    // await airdrop(squads.connection, executorMemberWallet.publicKey, LAMPORTS_PER_SOL);
     // execute the transaction
     yield executorMemberSquads.executeTransaction(multisigTransaction.publicKey);
     const postExecuteState = yield squads.getTransaction(multisigTransaction.publicKey);

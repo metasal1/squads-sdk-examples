@@ -38,22 +38,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const sdk_1 = __importStar(require("@sqds/sdk"));
 const web3_js_1 = require("@solana/web3.js");
-const sdk_2 = require("@sqds/sdk");
 const bn_js_1 = __importDefault(require("bn.js"));
-const functions_1 = require("../functions");
 // creates a multisig with 1 signer and a single member using the immediate function
 const createSquadExample = () => __awaiter(void 0, void 0, void 0, function* () {
-    const walletKeypair = web3_js_1.Keypair.generate();
-    const squads = sdk_1.default.devnet(new sdk_2.Wallet(walletKeypair));
+    // const walletKeypair = Keypair.generate();
+    const walletKeypair = web3_js_1.Keypair.fromSecretKey(new Uint8Array([228, 73, 124, 181, 254, 248, 146, 226, 239, 74, 186, 115, 86, 179, 177, 116, 169, 217, 79, 216, 205, 122, 219, 201, 174, 66, 187, 114, 48, 233, 183, 6, 34, 41, 170, 218, 17, 145, 215, 6, 66, 20, 57, 232, 54, 170, 237, 136, 218, 43, 166, 63, 137, 56, 237, 63, 75, 237, 226, 102, 58, 151, 203, 51]));
+    console.log('Wallet Keypair:', walletKeypair.publicKey.toBase58());
+    console.log('Wallet Private Key:', walletKeypair.secretKey.toString());
+    const squads = sdk_1.default.devnet(new sdk_1.Wallet(walletKeypair));
     // random key so no collision
     const createKey = new web3_js_1.Keypair().publicKey;
     const threshold = 1;
     const members = [walletKeypair.publicKey];
-    const name = 'Test Squad';
+    const name = 'Metasals Squad';
     const description = 'This is a test squad';
     try {
         // airdrop to fund the wallet - may fail occasionally since it defaults to public devnet
-        const sig = yield (0, functions_1.airdrop)(squads.connection, walletKeypair.publicKey, web3_js_1.LAMPORTS_PER_SOL);
+        // const sig = await airdrop(squads.connection, walletKeypair.publicKey, LAMPORTS_PER_SOL);
         const multisigAccount = yield squads.createMultisig(threshold, createKey, members, name, description);
         console.log("Successfully created a new multisig at", multisigAccount.publicKey.toBase58());
         console.log('Multisig account:', JSON.stringify(multisigAccount));
